@@ -1,0 +1,436 @@
+<section class="content-header">
+  <h1>
+    <a [routerLink]="['/facilities']">
+      <img class="mr-1 mb-1" src="../../../../assets/images/back-arrow-icon.svg" />
+    </a>
+    {{faciltyName}}
+  </h1>
+</section>
+
+<!--Zone List start-->
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="drag-body dashboard-widget">
+      <div class="panel-heading">
+        <h5 class="panel-title"> Zones</h5>
+        <ul class="filter-for-chart">
+          <li>
+            <button [disableRipple]="true" mat-icon-button>
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+          </li>
+        </ul>
+      </div>
+      <mat-card class="dashboard-card mat-card">
+        <div class="cropscontainer facility-user-grid-box-container">
+          <div class="user-grid-box m-r-20 m-b-20" *ngFor="let zone of zoneList">
+            <div class="text-center text-center m-r-20 m-l-20">
+              <div class="crops-img-box">
+                <img alt="" class="img-fluid"
+                  src="{{zone.image == '00000000-0000-0000-0000-000000000000' || zone.image == null ||  zone.image == '' ? _appConstant.noImg: mediaUrl + zone.image}}">
+              </div>
+              <p class="user-grid-desc" title="{{zone.name}}">{{zone.name}}</p>
+            </div>
+            <div class="user-actions d-flex flex-wrap">
+              <!---->
+              <!---->
+              <div class="user-actions-cta text-center ng-star-inserted">
+                <a class="green" href="javascript:;">
+                  <img alt="Edit" src="../../../assets/images/icon-edit.svg" (click)="getZoneDetails(zone.guid);">
+                </a>
+              </div>
+              <!---->
+              <div class="user-actions-cta text-center">
+                <a class="red" href="javascript:void(0)" data-toggle="modal" data-target="#deviceDeleteModal"
+                  (click)="deleteModel(zone)" title="Delete">
+                  <img src="./assets/images/icon-delete.svg">
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="user-grid-box bigaddbutton m-b-20">
+            <a style="cursor:pointer" href="javascript:void(0);" (click)="Respond();">
+              <i class="material-icons">add</i>
+            </a>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>
+<!--Zone List end-->
+<div class="row">
+  <div class="col-ld-12 col-xl-12 m-b-30">
+    <div class="row">
+      <div class="col-12 m-b-30">
+        <div class="drag-body dashboard-widget">
+          <div class="panel-heading">
+            <div class="d-flex align-items-center w-100">
+
+              <div class="p-l-15">
+                <fieldset class="form-group form-field mb-0">
+                  <mat-form-field color="primary" class="mb-0">
+                    <mat-select placeholder="Select Type" (selectionChange)="getTypedata($event.value)"
+                      [(ngModel)]="selectedZoneType">
+                      <mat-option *ngFor="let zonetype of zoneTypeList" [value]="zonetype?.value">
+                        {{zonetype.text}}
+                      </mat-option>
+                    </mat-select>
+                    <!--<div class="form-control-feedback" *ngIf="bulkForm.controls['kitTypeGuid'].errors">
+                          <p class="form-tooltip-error sm" [ngClass]="{'error':true}"
+                               *ngIf="bulkForm.controls['kitTypeGuid'].errors.required && checkSubmitStatus">
+                              Please select Kit Type
+                          </p>
+                      </div>-->
+                  </mat-form-field>
+                </fieldset>
+              </div>
+              <div class="p-l-15 col-3">
+                <fieldset class="form-group form-field mb-0">
+                  <mat-form-field color="primary" class="mb-0">
+                    <mat-select [disableOptionCentering]="true" panelClass="myPanelClass" placeholder="Select Zone" [(ngModel)]="datazone"
+                      (selectionChange)="getDeviceName($event.value)">
+                      <mat-option *ngFor="let zone of zoneDataList" [value]="zone?.value">
+                        {{zone.text}}
+                      </mat-option>
+                    </mat-select>
+                    <!--<div class="form-control-feedback" *ngIf="bulkForm.controls['kitTypeGuid'].errors">
+                          <p class="form-tooltip-error sm" [ngClass]="{'error':true}"
+                               *ngIf="bulkForm.controls['kitTypeGuid'].errors.required && checkSubmitStatus">
+                              Please select Kit Type
+                          </p>
+                      </div>-->
+                  </mat-form-field>
+                </fieldset>
+              </div>
+              <div class="p-l-15 col-3">
+                <fieldset class="form-group form-field mb-0">
+                  <mat-form-field color="primary" class="mb-0">
+                    <mat-select placeholder="Select Sensor" [(ngModel)]="devicenames"
+                      (selectionChange)="getSensorName($event.value)">
+                      <mat-option *ngFor="let sen of sensorList" [value]="sen?.value">
+                        {{sen.text}}
+                      </mat-option>
+                    </mat-select>
+                    <!--<div class="form-control-feedback" *ngIf="bulkForm.controls['kitTypeGuid'].errors">
+                          <p class="form-tooltip-error sm" [ngClass]="{'error':true}"
+                               *ngIf="bulkForm.controls['kitTypeGuid'].errors.required && checkSubmitStatus">
+                              Please select Kit Type
+                          </p>
+                      </div>-->
+                  </mat-form-field>
+                </fieldset>
+              </div>
+              <div class="p-l-15 ml-auto">
+                <div>
+                  <a data-toggle="modal" href="#myModal" class="telemetry-link">
+                    <img src="../../../assets/images/telemetry-icon.svg">
+                    <span>Telemetry Data</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="ishow == true">
+            <mat-card class="dashboard-card mat-card">
+
+              <!-- <h2>{{zoneName}} zone, {{faciltyName}} Facility</h2> -->
+
+              <div class="row">
+                <div class="col-lg-3">
+                  <!-- <highcharts-chart [Highcharts]="highcharts"
+                                    [options]="chartOptions"
+                                    style="width: 100%; height: 350px; display: block;">
+                  </highcharts-chart> -->
+
+                  <div class="left-chart-holder">
+                    <h2 class="facility-device-title">
+                      <div class="device-status mr-2" [ngClass]="(deviceIsConnected)?'on':'off'"></div>
+                      {{sensorNamedata}}
+                    </h2>
+                    <div class="small-widget-chart">
+                      <rg-gauge-chart [canvasWidth]="canvasWidth" [needleValue]="needleValue"
+                        [centralLabel]="centralLabel" [options]="optionsdata" [name]="name" [bottomLabel]="bottomLabel">
+                      </rg-gauge-chart>
+                    </div>
+                    <div *ngIf="!pieChartObj.dataTable.length" class="small-widget-chart">
+                      <h4>0</h4>
+                    </div>
+                    <div class="legends-container">
+                      <div class="legends-item">
+                        <div class="legend-range bg-green">0-50</div>
+                        <div class="legend-title">Good</div>
+                      </div>
+                      <div class="legends-item">
+                        <div class="legend-range bg-blue">50-100</div>
+                        <div class="legend-title">Moderate</div>
+                      </div>
+                      <div class="legends-item">
+                        <div class="legend-range bg-grey">100-150</div>
+                        <div class="legend-title">Unhealthy for sensitive groups</div>
+                      </div>
+                      <div class="legends-item ">
+                        <div class="legend-range bg-yellow">150-200</div>
+                        <div class="legend-title">Unhealthy</div>
+                      </div>
+                      <div class="legends-item ">
+                        <div class="legend-range bg-orange">200-300</div>
+                        <div class="legend-title">Very Unhealthy</div>
+                      </div>
+                      <div class="legends-item ">
+                        <div class="legend-range bg-red">300-500</div>
+                        <div class="legend-title">Hazardous</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-9">
+                  <div class="row h-100">
+                    <div class="col-md-12 col-lg-7">
+                      <div class="row dashboardtop-widget">
+                        <div class="col-xl-4 col-lg-4 m-b-20" *ngFor="let attval of attrdatadetail;let i = index">
+                          <div [ngClass]="colors[i]" class="data-snippet-item text-center">
+                            <div class="data-snippet-title">{{attval.attributeValue}}</div>
+                            <div class="data-snippet-text">{{attval.attributeName | uppercase }}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- <div class="data-snippets">
+                        <div class="data-snippet-item" >
+                          <div class="data-snippet-title">{{attval.attributeName}}</div>
+                          <div class="data-snippet-text">{{attval.attributeValue}}</div>
+                        </div>
+                      </div> -->
+                    </div>
+                    <div class="col-md-12 col-lg-5">
+                      <div class="col-ld-12 col-xl-12 p-0" *ngIf="ishow == true">
+                        <div class="drag-body dashboard-widget h-100">
+                          <div class="panel-heading">
+                            <h5 class="panel-title w-100"> Alerts </h5>
+                            <div style="margin-right: 20px;" class="tab-link-bar" *ngIf="alerts?.length>0">
+                              <a class="text-nowrap" [routerLink]="['/alerts/',zoneId,devicename]"
+                                href="javascript:;">View All</a>
+                            </div>
+                          </div>
+                          <mat-card class="dashboard-card mat-card pt-0">
+                            <ul *ngIf="alerts.length>0" class="alerts-dashboard alerts-dashboard-facility">
+                              <li [ngClass]="alert['severity']" *ngFor="let alert of alerts">
+                                <span class="alerts-date">{{getLocalDate(alert['eventDate'])}}</span>
+                                <span class="alerts-info">{{alert.message}}</span>
+                              </li>
+                              <li *ngIf="alerts.length==0" class="centerclass">
+                                No records found
+                              </li>
+                            </ul>
+                            <div *ngIf="alerts.length>0" class="alert-indicator-wrapper">
+                              <div class="alert-indicator-list" *ngIf="alerts?.length>0">
+                                <div class="alert-indicator Critical">
+                                  <span class="legend"></span>
+                                  <span class="alert-text">Critical</span>
+                                </div>
+                                <div class="alert-indicator Information">
+                                  <span class="legend"></span>
+                                  <span class="alert-text">Information</span>
+                                </div>
+                                <div class="alert-indicator Major">
+                                  <span class="legend"></span>
+                                  <span class="alert-text">Major</span>
+                                </div>
+                                <div class="alert-indicator Minor">
+                                  <span class="legend"></span>
+                                  <span class="alert-text">Minor</span>
+                                </div>
+                                <div class="alert-indicator Warning">
+                                  <span class="legend"></span>
+                                  <span class="alert-text">Warning</span>
+                                </div>
+                              </div>
+                            </div>
+                          </mat-card>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+        <div class="col-12  p-0" *ngIf="ishow == true">
+          <div class="drag-body dashboard-widget">
+            <div class="panel-heading">
+              <h5 class="panel-title w-100"> Statistics </h5>
+              <div class="dark-card-header-right">
+
+                <div class="time-sync"> Last Sync on {{lastSyncDate}} (UTC)</div>
+
+              </div>
+            </div>
+            <mat-card class="dashboard-card mat-card">
+              <mat-tab-group (selectedTabChange)="onTabChange($event)">
+                <mat-tab *ngFor="let attdata of attname" label="{{attdata.text}}">
+                  <ng-template mat-tab-label>{{attdata.text | uppercase}}</ng-template>
+
+                  <div class="radio-group-box">
+                    <mat-radio-group (change)="changeGraphFilter($event)" aria-label="Select an option">
+                      <mat-radio-button checked value="Day">Day</mat-radio-button>
+                      <mat-radio-button value="Week">Week</mat-radio-button>
+                      <mat-radio-button value="Month">Month</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                  <!-- <div  style="padding: 200px;"> -->
+                  <div *ngIf="!isChartLoaded" style="padding: 188px;text-align: center;">
+                    Loading...
+                  </div>
+                  <ng-container *ngIf="isChartLoaded">
+                    <google-chart *ngIf="columnChart2.dataTable.length" [data]="columnChart2"></google-chart>
+                  </ng-container>
+
+                  <div class="centerclass soil-nutritions" *ngIf="!columnChart2.dataTable.length">
+                    No Data found
+                  </div>
+                </mat-tab>
+              </mat-tab-group>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal" id="myModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content drag-body ">
+
+      <div class="panel-heading">
+        <h4 class="panel-title">Telemetry Data</h4>
+        <button type="button" [disableRipple]="true" matSuffix mat-button class="close mr-3" data-dismiss="modal">
+          &times;
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-body-header justify-content-end align-items-center">
+          <h2>{{sensorNamedata}}</h2>
+          <button mat-icon-button class="dropdown-toggle custom-dropdown-toggle" data-toggle="dropdown">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+
+        </div>
+        <div class="modal-body-data">
+          <div>
+
+            <canvas baseChart [chartType]="'line'" [datasets]="datasets" [options]="options">
+
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<section class="create-drawer transform" *ngIf="respondShow">
+  <div class="head">
+    <a href="javascript:void()" class="closedrawer" (click)="closerepond()">
+      <i class="material-icons">close</i>
+    </a>
+    <h2>{{zoneModuleName}}</h2>
+  </div>
+  <div class="form-container">
+    <div class="view-form">
+      <!-- <div class="form-detail-list">
+          <label>Email: </label>
+          <p>Email</p>
+        </div>
+        <div class="form-detail-list">
+          <label>Name: </label>
+          <p>Name</p>
+        </div> -->
+      <form [formGroup]="zoneForm" (ngSubmit)="manageZone();" autocomplete="off" class="form-horizontal common-form">
+        <div class="row">
+          <div class="col-12">
+            <label class="form-label">Name<b>*</b></label>
+            <mat-form-field>
+              <input matInput name="name" formControlName="name" type="text" maxlength="50"
+                [(ngModel)]="zoneObj['name']" class="form-control" tabindex="1" placeholder="Name">
+              <div class="form-control-feedback" *ngIf="zoneForm.controls['name'].errors">
+                <p class="form-tooltip-error sm " [ngClass]="{'error':true}"
+                  *ngIf="zoneForm.controls['name'].errors.required && checkSubmitStatus">
+                  Please enter Name
+                </p>
+              </div>
+            </mat-form-field>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Type<b>*</b></label>
+            <mat-form-field>
+              <mat-select placeholder="Select Type" formControlName="type" [(ngModel)]="zoneObj['type']" tabindex="2">
+                <mat-option *ngFor="let type of typeList" [value]="type.value">
+                  {{type.text}}
+                </mat-option>
+              </mat-select>
+              <div class="form-control-feedback" *ngIf="zoneForm.controls['type'].errors">
+                <p class="form-tooltip-error sm" [ngClass]="{'error':true}"
+                  *ngIf="zoneForm.controls['type'].errors.required && checkSubmitStatus">
+                  Please select Type
+                </p>
+              </div>
+            </mat-form-field>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <mat-form-field>
+              <textarea matInput rows="3" class="form-control" formControlName="description" placeholder="Description"
+                name="description" [(ngModel)]="zoneObj['description']" maxlength="255" tabindex="3"></textarea>
+            </mat-form-field>
+          </div>
+          <div class="col-12">
+            <label for="myFile" class="upload-file">
+              <input #imageupload formControlName="imageFile" #myFile id="myFile" (change)="handleImageInput($event)"
+                class="upload-image" type="file" tabindex="4" accept="image/*" />
+              <div class="form-control-feedback" *ngIf="zoneForm.controls['imageFile'].errors">
+                <p class="form-tooltip-error sm" [ngClass]="{'error':true}"
+                  *ngIf="zoneForm.controls['imageFile'].errors.required && checkSubmitStatus">
+                  Upload Image
+                </p>
+              </div>
+            </label>
+            <fieldset class="form-group">
+              <ul class="image-list ">
+                <li>
+                  <div class="user-profle-image">
+                    <img *ngIf="zoneObj['image']" (click)="imageRemove()" class="close-icn"
+                      src="../../../../assets/images/cancel-dashboard.svg" alt="">
+                    <img alt="" class="img-fluid"
+                      src="{{zoneObj['image'] == '00000000-0000-0000-0000-000000000000' || zoneObj['image'] == null || zoneObj['image'] == '' ? _appConstant.noImg:  zoneObj['image']}}" />
+                    <!--<a href="javascript:()" class="underline">Update Image</a>-->
+
+                  </div>
+                </li>
+              </ul>
+            </fieldset>
+            <p>{{fileName}}</p>
+            <div class="row">
+              <div class="col-12 mt-4">
+                <div class="form-field">
+                  <div class="input-field ">
+                    <button mat-flat-button color="primary" class="text-white " title="{{buttonname}}" type="submit">
+                      {{buttonname}}
+                    </button>
+                    <button mat-flat-button color="primary" class="text-white m-l-10" (click)="closerepond()"
+                      title="Cancel">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

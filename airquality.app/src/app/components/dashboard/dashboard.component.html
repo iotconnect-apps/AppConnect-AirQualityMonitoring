@@ -1,0 +1,177 @@
+<section class="content-header">
+  <h1>Dashboard</h1>
+</section>
+<div class="main-page dashboard">
+  <div class="dashboardtop-widget">
+    <div class="dashboard-chart  topwidget-1">
+      <div class="dashboard-chart-item">
+        <div class="topwidget-icon"><img src="../../../../assets/images/icon-facility.svg"></div>
+        <p>Total <br />Facilities</p>
+        <h4>{{totalFacilities}}</h4>
+      </div>
+    </div>
+    <div class="dashboard-chart topwidget-2">
+      <div class="dashboard-chart-item">
+        <div class="topwidget-icon"><img src="../../../../assets/images/icon-zones.svg"></div>
+        <p>Total <br /> Zones</p>
+        <h4>{{totalZones}}</h4>
+      </div>
+    </div>
+    <div class="dashboard-chart topwidget-3">
+      <div class="dashboard-chart-item">
+        <div class="topwidget-icon"><img src="../../../../assets/images/icon-outdoor.svg"></div>
+        <p>Total <br /> Outdoor Zones</p>
+        <h4>{{totalOutdoorZones}}</h4>
+      </div>
+    </div>
+    <div class="dashboard-chart topwidget-4">
+      <div class="dashboard-chart-item">
+        <div class="topwidget-icon"><img src="../../../../assets/images/icon-indoor.svg"></div>
+        <p>Total <br /> Indoor Zones</p>
+        <h4>{{totalIndoorZones}}</h4>
+      </div>
+    </div>
+    <div class="dashboard-chart topwidget-5">
+      <div class="dashboard-chart-item">
+        <div class="topwidget-icon"><img src="../../../../assets/images/icon-alert.svg"></div>
+        <p>Total <br /> Alerts (Today)</p>
+        <h4>{{totalAlerts}}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-8  m-b-30">
+      <div class="drag-body dashboard-widget h-100">
+        <div class="panel-heading">
+          <h5 class="panel-title"> Locations </h5>
+          <div class="mr-3">
+            <button mat-flat-button type="button" color="primary" title="Map" [ngClass]=" mapview ? 'active' : ''"
+              (click)="mapview = !mapview">Map</button>
+            <button mat-flat-button type="button" color="primary" class="ml-3" title="List"
+              [ngClass]="!mapview ? 'active' : ''" (click)="mapview = !mapview">List</button>
+          </div>
+        </div>
+        <mat-card class="dashboard-card mat-card p-0">
+          <div *ngIf="!mapview" id="map-list">
+            <div class="map-list-wrapper">
+              <div class="user-grid-wrapper p-3 pb-0">
+                <section class="content-header p-t-10">
+                  <h2 class="panel-title"> Facilities </h2>
+                  <div class="ml-auto content-header-action">
+                    <form>
+                      <div>
+                        <app-search-render [searchValue]="searchParameters.searchText" (searchEvent)="searchTextCallback($event)">
+                        </app-search-render>
+                        <!-- <mat-form-field class="example-full-width">
+                          <input class="search" matInput placeholder="Search" autocomplete="off" value="">
+                          <button type="button" matSuffix mat-button class="search-btn">
+                            <img src="../../../assets/images/search-icon.svg" alt="">
+                          </button>
+                        </mat-form-field> -->
+                      </div>
+                      <div class="p-l-20">
+                        <button [routerLink]="['/facility/add']" type="button" mat-flat-button color="primary"
+                          lass="text-white">
+                          Add Facility
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </section>
+                <div class="row">
+                  <div class="col-ld-6 col-lg-6 col-xl-6 m-b-30" *ngFor="let facility of facilityList">
+                    <div class="user-grid-box">
+                      <div class="user-status-indicator status-green"></div>
+                      <div class="grid-inner-flex d-flex align-items-center">
+                        <div class="user-image-box">
+                          <img alt="" class="img-fluid ng-star-inserted"
+                            src="{{facility['image'] == '00000000-0000-0000-0000-000000000000' || facility['image'] == null ||  facility['image'] == '' ? _appConstant.noImg: mediaUrl + facility['image']}}">
+                        </div>
+                        <div class="user-detail-box">
+                          <h3 class="user-name"><a
+                              [routerLink]="['/facility-dashboard',facility['guid']]">{{facility['name']}}</a></h3>
+                          <p class="user-details">Zones <span>{{facility.totalSubEntities}}</span></p>
+                          <p class="user-details">Temperature <span> {{facility.avgTemperature}}</span></p>
+                          <p class="user-details">Humidity <span> {{facility.avgHumidity}}</span></p>
+                        </div>
+                      </div>
+                      <div class="user-actions d-flex flex-wrap">
+                        <div class="user-actions-cta text-center">
+                          <a href="javascript:;" [routerLink]="['/facility/',facility['guid']]" title="Edit">
+                            <img src="../../../assets/images/icon-edit.svg" alt="Edit">
+                          </a>
+                        </div>
+                        <div class="user-actions-cta text-center">
+                          <a href="javascript:;" (click)="deleteModel(facility['guid'])" data-target="#deviceDeleteModal" title="Delete">
+                            <img src="../../../assets/images/icon-delete.svg" alt="Delete">
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="facilityList.length === 0" class="centerclass">No records found</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+          <div *ngIf="mapview" id="map-view">
+            <agm-map [latitude]="lat" [longitude]="lng">
+              <agm-marker *ngFor="let facility of facilityList" [latitude]="facility.latitude ? facility.latitude : lat"
+                [longitude]="facility.longitude ? facility.longitude : lng"
+                [iconUrl]="{ url: '../../../../assets/images/icon-location.svg'}">
+                <agm-info-window [isOpen]="true" #infoWindow>
+                  <strong>{{facility.name}}</strong>
+                </agm-info-window>
+              </agm-marker>
+            </agm-map>
+          </div>
+      
+        </mat-card>
+      </div>
+    </div>
+    <div class="col-xl-4 m-b-30">
+      <div class="drag-body dashboard-widget h-100">
+        <div class="panel-heading">
+          <h5 class="panel-title w-100"> Alerts </h5>
+          <div style="margin-right: 20px;" class="tab-link-bar" *ngIf="alerts?.length>0">
+            <a class="text-nowrap" [routerLink]="['/alerts']" href="javascript:;">View All</a>
+          </div>
+        </div>
+        <mat-card class="dashboard-card mat-card pt-0">
+          <ul *ngIf="alerts.length>0" class="alerts-dashboard">
+						<li [ngClass]="alert['severity']" *ngFor="let alert of alerts">
+              <span class="alerts-date">{{getLocalDate(alert['eventDate'])}}</span>
+							<span class="alerts-info">{{alert.message}}</span>
+						</li>
+					</ul>
+					<div *ngIf="alerts.length==0" class="centerclass">No records found</div>
+          <div *ngIf="alerts.length>0" class="alert-indicator-wrapper">
+            <div class="alert-indicator-list" *ngIf="alerts?.length>0">
+              <div class="alert-indicator Critical">
+                <span class="legend"></span>
+                <span class="alert-text">Critical</span>
+              </div>
+              <div class="alert-indicator Information">
+                <span class="legend"></span>
+                <span class="alert-text">Information</span>
+              </div>
+              <div class="alert-indicator Major">
+                <span class="legend"></span>
+                <span class="alert-text">Major</span>
+              </div>
+              <div class="alert-indicator Minor">
+                <span class="legend"></span>
+                <span class="alert-text">Minor</span>
+              </div>
+              <div class="alert-indicator Warning">
+                <span class="legend"></span>
+                <span class="alert-text">Warning</span>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
